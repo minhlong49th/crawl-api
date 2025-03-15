@@ -1,0 +1,71 @@
+
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: crawler-postgres
+    restart: always
+    networks:
+      - crawler-network
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - POSTGRES_NON_ROOT_USER
+      - POSTGRES_NON_ROOT_PASSWORD
+    ports:
+      - 5010:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-data.sh:/docker-entrypoint-initdb.d/init-data.sh
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -h localhost -U ${POSTGRES_USER} -d ${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:latest
+    container_name: crawler-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - crawler-network
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - DATABASE_HOST=postgres
+  #     - DATABASE_PORT=5432
+  #     - DATABASE_USER=crawl_user
+  #     - DATABASE_PASSWORD=crawl_password
+  #     - DATABASE_NAME=crawl_db
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - NODE_ENV=development
+  #   depends_on:
+  #     - postgres
+  #     - redis
+  #   volumes:
+  #     - .:/usr/src/app
+  #     - /usr/src/app/node_modules
+
+networks:
+  crawler-network:
+      driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

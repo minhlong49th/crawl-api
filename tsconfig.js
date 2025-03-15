@@ -1,0 +1,63 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2023",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "noFallthroughCasesInSwitch": false,
+    "esModuleInterop": true,
+  }
+}
+// {
+//   "$schema": "http://json.schemastore.org/tsconfig",
+//   "compilerOptions": {
+//     "allowJs": false,
+//     "allowSyntheticDefaultImports": true,
+//     "declaration": true,
+//     "emitDecoratorMetadata": true,
+//     "esModuleInterop": true,
+//     "experimentalDecorators": true,
+//     "importHelpers": true,
+//     "lib": [
+//       "ES2020",
+//       "ES2020.BigInt",
+//       "ES2020.Promise",
+//       "ES2020.String",
+//       "ES2020.Symbol.WellKnown",
+//       "dom"
+//     ],
+//     "types": ["node"],
+//     "module": "commonjs",
+//     "moduleResolution": "node",
+//     "noFallthroughCasesInSwitch": true,
+//     "noImplicitAny": true,
+//     "noImplicitReturns": true,
+//     "noUnusedLocals": true,
+//     "forceConsistentCasingInFileNames": true,
+//     "noUnusedParameters": true,
+//     "removeComments": false,
+//     "resolveJsonModule": true,
+//     "sourceMap": true,
+//     "inlineSources": true,
+//     "strict": true,
+//     "declarationMap": true,
+//     "strictNullChecks": true,
+//     "target": "ES2019",
+//     "outDir": "lib",
+//     "rootDir": "src"
+//   },
+//   "include": ["src/**/*"],
+//   "exclude": ["lib", "dist", "build", "node_modules", "test/**/*.spec.ts"]
+// }
