@@ -1,0 +1,1 @@
+Get-ChildItem -Path src -Recurse -Filter *.js | Remove-Item -Force
