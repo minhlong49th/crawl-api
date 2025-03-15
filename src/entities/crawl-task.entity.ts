@@ -50,6 +50,9 @@ export class CrawlTask {
   @Column({ nullable: true })
   completedAt: Date;
 
+  @Column({ nullable: true })
+  lastStatusCheck: Date; // New field
+
   // @OneToMany(() => Brand, (brand) => brand.crawlTask)
   // brands: Brand[];
 

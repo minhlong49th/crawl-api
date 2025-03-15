@@ -21,7 +21,7 @@ import { UppromoteLoginStrategy } from './login.strategy';
 
 @Injectable()
 export class UppromoteStrategy extends BaseCrawlerStrategy {
-  
+
   private readonly logger = new Logger(UppromoteStrategy.name);
   protected taskId: string;
 
@@ -30,6 +30,8 @@ export class UppromoteStrategy extends BaseCrawlerStrategy {
   private readonly loginStrategy: UppromoteLoginStrategy;
 
   private currentPage: number = 1;
+  private isRunning: boolean = false;
+
 
   constructor(
     private readonly crawlDataRepository: Repository<CrawlData>,
@@ -43,6 +45,11 @@ export class UppromoteStrategy extends BaseCrawlerStrategy {
     this.loginStrategy = new UppromoteLoginStrategy(config);
   }
 
+  async stopCrawl(): Promise<void> {
+    this.isRunning = false;
+    this.logger.debug(`Stopping crawl uppromote website ${this.isRunning}`);
+  }
+
   async extractData(
     page: Page,
     taskId: string,
@@ -50,6 +57,7 @@ export class UppromoteStrategy extends BaseCrawlerStrategy {
     this.logger.debug('Extracting Uppromote data');
 
     try {
+      this.isRunning = true;
       this.taskId = taskId;
       this.currentPage = 1;
       let hasNextPage = true;
@@ -91,13 +99,19 @@ export class UppromoteStrategy extends BaseCrawlerStrategy {
         
 
         if (accessTokenCookie) {
-          while(hasNextPage) {
+          while(hasNextPage && this.isRunning) {
             const offers = await this.crawlListOffer(accessTokenCookie);
 
             // Process the API response
             if (offers && offers.data) {
               for (const offer of offers.data) {
 
+                //check the running is false break this loop and stop crawl
+                if (!this.isRunning) {
+                  this.logger.debug(`Crawl is stopping ${this.isRunning} - break this loop and stop crawl`);
+                  break;
+                }
+                
                 const isExist = await this.crawlDataRepository.findOneBy({ name: offer['name'] });
                 if (isExist) {
                     this.logger.debug(`Item ${offer['name']} already exist`);
@@ -183,6 +197,7 @@ export class UppromoteStrategy extends BaseCrawlerStrategy {
       const crawlData = this.crawlDataRepository.create({
         source: 'uppromote',
         name: offer['name'],
+        website: brandResponse.data['website'],
         data: brandResponse.data,
         crawlTaskId: taskId,
       });
@@ -195,44 +210,6 @@ export class UppromoteStrategy extends BaseCrawlerStrategy {
     }
 
   }
-
-  // async extractData(
-  //   page: Page,
-  //   taskId: string,
-  // ): Promise<Record<string, any>[]> {
-  //   this.logger.debug('Extracting Uppromote data');
-
-  //   try {
-  //     this.taskId = taskId;
-  //     this.currentPage = 1;
-  //     let hasNextPage = true;
-  //     const resultData: Record<string, any>[] = [];
-
-  //     await this.dashboardStrategy.progessDashboardPage(page, this.currentPage);
-
-  //     // Loop through all the pages
-  //     while (hasNextPage) {
-  //       this.logger.debug(`Extracting data from page ${this.currentPage}`);
-  //       // Extract items from current page
-  //       const items = await this.extractPageData(page);
-  //       resultData.push(...items);
-
-  //       hasNextPage = await this.progressNextPageButton(page);
-  //     }
-
-  //     this.logger.debug('Extracting Uppromote data - ready');
-
-  //     return resultData;
-  //   } catch (error: unknown) {
-  //     const errorMessage =
-  //       error instanceof Error ? error.message : String(error);
-  //     throw new WebsiteCrawlerError(
-  //       `Failed to extract Uppromote data: ${errorMessage}`,
-  //       this.config.type,
-  //       { originalError: error },
-  //     );
-  //   }
-  // }
 
   async progressNextPageButton(page: Page): Promise<boolean> {
     await retry(async () => {

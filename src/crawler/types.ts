@@ -74,6 +74,7 @@ export interface CrawlerStrategy {
   navigate(page: Page, url: string): Promise<void>;
   extractData(page: Page, taskId: string): Promise<Record<string, any>[]>;
   validateConfiguration(): Promise<void>;
+  stopCrawl() : Promise<void>;
 }
 
 // export interface DataExtractor {

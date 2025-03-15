@@ -3,26 +3,31 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Page, ElementHandle } from 'playwright';
 import { BaseCrawlerStrategy } from '../base-crawler.strategy';
-import { similarwebConfig } from '../../configs/similarweb.config';
 import { SimilarwebData } from '../../../entities/similarweb-data.entity';
 import { WebsiteCrawlerError } from '../../types';
 import { ApiService } from '../../services/api.service';
+import { similarwebConfig as config } from '../../configs/similarweb.config';
 
 @Injectable()
 export class SimilarwebStrategy extends BaseCrawlerStrategy {
   private readonly logger = new Logger(SimilarwebStrategy.name);
+  private isRunning: boolean = false;
 
   constructor(
     @InjectRepository(SimilarwebData)
     private readonly dataRepository: Repository<SimilarwebData>,
     private readonly apiService: ApiService,
   ) {
-    super(similarwebConfig);
+    super(config);
   }
 
   async login(): Promise<void> {
     // No login required for Similarweb
     return;
+  }
+
+  async stopCrawl(): Promise<void> {
+    this.isRunning = false;
   }
 
   protected async validateWebsiteSpecificConfig(): Promise<void> {
@@ -126,6 +131,20 @@ export class SimilarwebStrategy extends BaseCrawlerStrategy {
 
   async extractData(page: Page, taskId: string): Promise<Record<string, any>[]> {
     try {
+      if (!page) {
+          this.logger.debug('Page element is not available');
+          throw new Error('Page element is not available');
+      }
+
+      //replace {domain} in the config.endpoints.initPage string is google.com to 
+      const domain = this.getDomainFromURL(page.url());
+      config.endpoints.initPage = config.endpoints.initPage.replace('{domain}', domain);
+
+
+      await page.goto(config.baseUrl + config.endpoints.initPage, {
+        waitUntil: 'networkidle',
+      });
+
       const selectors = this.config.selectors.data;
       const url = await page.url();
       

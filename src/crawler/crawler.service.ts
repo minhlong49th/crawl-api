@@ -17,25 +17,30 @@ export class CrawlerService {
   private readonly logger = new Logger(CrawlerService.name);
   private activeCrawlingTasks: Map<string, Page> = new Map();
 
-  async stopCrawl(taskId: string): Promise<void> {
-    this.logger.log(`Stopping crawl for task ID: ${taskId}`);
+  async stopCrawl(task: CrawlTask): Promise<void> {
+    this.logger.log(`Stopping crawl for task ID: ${task.id}`);
     
-    const page = this.activeCrawlingTasks.get(taskId);
+    const strategy = this.getStrategy(task.websiteType);
+    if (strategy) {
+      await strategy.stopCrawl();
+    }
+
+    const page = this.activeCrawlingTasks.get(task.id);
     if (page) {
       try {
         
         await page.close();
-        this.activeCrawlingTasks.delete(taskId);
-        this.logger.log(`Successfully stopped crawl for task ID: ${taskId}`);
+        this.activeCrawlingTasks.delete(task.id);
+        this.logger.log(`Successfully stopped crawl for task ID: ${task.id}`);
 
       } catch (error: unknown) {
         
-        this.logger.error(`Failed to stop crawl for task ID: ${taskId}`, error instanceof Error ? error.stack : 'Unknown error' );
-        throw new Error(`Failed to stop crawl for task ID ${taskId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        this.logger.error(`Failed to stop crawl for task ID: ${task.id}`, error instanceof Error ? error.stack : 'Unknown error' );
+        throw new Error(`Failed to stop crawl for task ID ${task.id}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       
       }
     } else {
-      this.logger.warn(`No active crawling task found for task ID: ${taskId}`);
+      this.logger.warn(`No active crawling task found for task ID: ${task.id}`);
     }
   }
 

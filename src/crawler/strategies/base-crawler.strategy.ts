@@ -11,47 +11,6 @@ import {
 export abstract class BaseCrawlerStrategy implements CrawlerStrategy {
   protected constructor(protected readonly config: WebsiteConfig) {}
 
-  // async login(page: Page): Promise<void> {
-  //   try {
-  //     if (this.config.authentication.type === 'none') {
-  //       return;
-  //     }
-
-  //     if (!this.config.selectors.login) {
-  //       throw new WebsiteCrawlerError(
-  //         'Login selectors not configured',
-  //         this.config.type,
-  //         { config: this.config },
-  //       );
-  //     }
-
-  //     const { emailInput, passwordInput, submitButton } =
-  //       this.config.selectors.login;
-  //     const credentials = this.config.authentication.credentials;
-
-  //     if (!credentials?.email || !credentials?.password) {
-  //       throw new WebsiteCrawlerError(
-  //         'Login credentials not provided',
-  //         this.config.type,
-  //         { authType: this.config.authentication.type },
-  //       );
-  //     }
-
-  //     await page.fill(emailInput, credentials.email);
-  //     await page.fill(passwordInput, credentials.password);
-  //     await page.click(submitButton);
-  //     await page.waitForNavigation();
-  //   } catch (error: unknown) {
-  //     const errorMessage =
-  //       error instanceof Error ? error.message : String(error);
-  //     throw new WebsiteCrawlerError(
-  //       `Login failed: ${errorMessage}`,
-  //       this.config.type,
-  //       { originalError: error },
-  //     );
-  //   }
-  // }
-
   async navigate(page: Page, url: string): Promise<void> {
     try {
       await page.goto(url, { waitUntil: 'networkidle' });
@@ -73,6 +32,7 @@ export abstract class BaseCrawlerStrategy implements CrawlerStrategy {
   ): Promise<Record<string, any>[]>;
 
   abstract login(page: Page): Promise<void>;
+  abstract stopCrawl(): Promise<void> 
 
   async validateConfiguration(): Promise<void> {
     if (!this.config) {

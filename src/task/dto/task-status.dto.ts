@@ -43,5 +43,5 @@ export class TaskStatusResponseDto {
     },
   })
   // data: Array<BrandData & { offer: OfferData }>;
-  data: [];
+  data: Array<any>;
 }

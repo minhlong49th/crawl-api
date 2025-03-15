@@ -26,6 +26,9 @@ export class CrawlData {
   @Column()
   name: string;
 
+  @Column()
+  website: string;
+
   @Column({ type: 'jsonb', nullable: true })
   data: Record<string, any>;
 
